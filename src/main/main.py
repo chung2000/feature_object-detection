@@ -36,8 +36,13 @@ from src.utils.font import add_font
 from src.utils.albumentations_A import train_compose
 from src.utils.albumentations_A import val_compose
 from src.utils.chageBbox import change_bboxes
+from src.utils.korean import set_korean_font
+
+from src.datas.models import make_model
+from src.datas.models import train_model
 
 import globals
+from globals import PILL_DETECTION
 
 # 데이터 기본 경로 (압축 해제한 위치)
 BASE_DIR = globals.BASE_DIR
@@ -51,9 +56,10 @@ TEST_IMG_DIR = f"{BASE_DIR}/test_images"
 YOLO_DIR = f"{BASE_DIR}/yolo_dataset"
 
 def main():
+    # 한글 폰트 설정
+    set_korean_font()
 
     """ main start """
-
     # GPU 설정
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
     print(f"Using device: {device}")
@@ -76,6 +82,8 @@ def main():
         2374: [115, 853, 227, 226],
         2430: [637, 203, 224, 219],
         2778: [125, 770, 315, 275],
+    665: [567, 625, 311, 315],
+    972: [653, 889, 217, 217]
     }
 
     change_bboxes(JSON_PATH, update_dict)
@@ -87,8 +95,8 @@ def main():
     #get_class_name_en(categories_df, images_df)
 
     ### FONT ###
-    set_font()
-    add_font()
+    #set_font()
+    #add_font()
 
     """ # 어노테이션 시각화 """
     process_visualize_annotations(images_df, categories_df, annotations_df)
@@ -116,7 +124,7 @@ def main():
     model = make_model(device)
 
     """ 모델 학습 """
-    train_model(model, yaml_path)
+    results = train_model(model, yaml_path, BASE_DIR)
 
     """ 모델 결과 """
     result_model()
@@ -528,43 +536,43 @@ def convert_data(train_images_df, val_images_df, train_annotations_df, val_annot
 
     return train_success, val_success
 
-def make_model(device):
-    #model = YOLO('yolov8m.pt')
-    model = YOLO('yolov8l.pt')
-    model.to(device)
-    return model
-
-def train_model(model, yaml_path):
-    # 학습 파라미터
-    results = model.train(
-        data=yaml_path,
-        epochs=35, ##30,  # 최대 20 에폭  ##임시로 에폭을 1로 설정함.
-        imgsz=1080,  ##800,  # 이미지 크기
-        batch=8,  # 배치 크기
-        patience=10,  # Early stopping patience (10 에폭 동안 개선 없으면 중단)
-        save=True,  # 모델 저장
-        device=0 if torch.cuda.is_available() else 'cpu',  # GPU 자동 선택
-        project=f'{BASE_DIR}/yolo_runs',  # 결과 저장 폴더
-        name='pill_detection',
-        exist_ok=True,
-        pretrained=True,
-        optimizer='Adam',
-        lr0=0.001,  # 초기 learning rate
-        lrf=0.01,  # 최종 learning rate
-        momentum=0.937,
-        weight_decay=0.0005,
-        warmup_epochs=5,  ##3,
-        box=7.5,  # box loss gain
-        cls=0.5,  # cls loss gain
-        dfl=1.5,  # dfl loss gain
-        label_smoothing=0.0,
-        val=True,  # Validation 수행
-        plots=True,  # 학습 그래프 자동 생성
-        verbose=True
-    )
-
-    print("\n 학습 완료!")
-    print(f" 결과 저장 위치: {BASE_DIR}/yolo_runs/pill_detection")
+# def make_model(device):
+#     #model = YOLO('yolov8m.pt')
+#     model = YOLO('yolov8l.pt')
+#     model.to(device)
+#     return model
+#
+# def train_model(model, yaml_path):
+#     # 학습 파라미터
+#     results = model.train(
+#         data=yaml_path,
+#         epochs=35, ##30,  # 최대 20 에폭  ##임시로 에폭을 1로 설정함.
+#         imgsz=1080,  ##800,  # 이미지 크기
+#         batch=8,  # 배치 크기
+#         patience=10,  # Early stopping patience (10 에폭 동안 개선 없으면 중단)
+#         save=True,  # 모델 저장
+#         device=0 if torch.cuda.is_available() else 'cpu',  # GPU 자동 선택
+#         project=f'{BASE_DIR}/yolo_runs',  # 결과 저장 폴더
+#         name='pill_detection',
+#         exist_ok=True,
+#         pretrained=True,
+#         optimizer='Adam',
+#         lr0=0.001,  # 초기 learning rate
+#         lrf=0.01,  # 최종 learning rate
+#         momentum=0.937,
+#         weight_decay=0.0005,
+#         warmup_epochs=5,  ##3,
+#         box=7.5,  # box loss gain
+#         cls=0.5,  # cls loss gain
+#         dfl=1.5,  # dfl loss gain
+#         label_smoothing=0.0,
+#         val=True,  # Validation 수행
+#         plots=True,  # 학습 그래프 자동 생성
+#         verbose=True
+#     )
+#
+#     print("\n 학습 완료!")
+#     print(f" 결과 저장 위치: {BASE_DIR}/yolo_runs/pill_detection")
 
 def result_model():
     # 한글 폰트 설정
@@ -581,7 +589,7 @@ def result_model():
     #plt.rc('font', family=font_name)
 
     # 결과 디렉터리 설정
-    result_dir = f"{BASE_DIR}/yolo_runs/pill_detection"
+    result_dir = f"{BASE_DIR}/yolo_runs/{PILL_DETECTION}"
 
     print("📈 YOLOv8 학습 결과 요약")
     print("=" * 60)
@@ -739,7 +747,6 @@ def visualize_clean(img_path, model, device, conf_threshold=0.35, iou_threshold=
     # 폰트 로드
     try:
         font = ImageFont.truetype(globals.FONT_PATH, 16)
-        #font = ImageFont.truetype('/usr/share/fonts/truetype/nanum/NanumBarunGothic.ttf', 16)
     except:
         font = ImageFont.load_default()
 
@@ -814,7 +821,7 @@ def process_visualize_clean(model, val_images_df, device):
             img_path,
             model,
             device,
-            conf_threshold=0.4,
+            conf_threshold=0.5,  ##0.4,
             iou_threshold=0.5
         )
 
@@ -950,7 +957,7 @@ def predict_model(model, val_images_df, val_annotations_df, categories_df, devic
 
 def predict_weight_model(device, test_img_dir):
     # Best 모델 로드
-    best_model_path = f"{BASE_DIR}/yolo_runs/pill_detection/weights/best.pt"
+    best_model_path = f"{BASE_DIR}/yolo_runs/{PILL_DETECTION}/weights/best.pt"
     model = YOLO(best_model_path)
 
     # Test 이미지 목록
