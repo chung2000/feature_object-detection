@@ -8,3 +8,5 @@ BASE_DIR = "C:/workspace/github/data"  #"/content/data" #이미지 경로는 여
 # 폰트 경로 지정 (윈도우 기본 폰트 폴더)
 FONT_PATH = get_korean_font_path()
 FONT_TYPE = get_korean_font()
+
+PILL_DETECTION = 'pill_detection_yolov8x'  ##'pill_detection'
