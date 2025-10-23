@@ -54,6 +54,10 @@ def main():
 
     """ main start """
 
+    # GPU 설정
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+    print(f"Using device: {device}")
+
     """ # 경로 확인 """
     check_datapath()
 
@@ -109,17 +113,13 @@ def main():
     yaml_path = make_class_list(categories_df, images_df, num_classes, train_success, val_success, YOLO_DIR)
 
     """ 모델 인스턴스 생성 """
-    model = make_model()
+    model = make_model(device)
 
     """ 모델 학습 """
     train_model(model, yaml_path)
 
     """ 모델 결과 """
     result_model()
-
-    # GPU 설정
-    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
-    print(f"Using device: {device}")
 
     process_visualize_clean(model, val_images_df, device)
 
@@ -528,16 +528,18 @@ def convert_data(train_images_df, val_images_df, train_annotations_df, val_annot
 
     return train_success, val_success
 
-def make_model():
-    model = YOLO('yolov8m.pt')
+def make_model(device):
+    #model = YOLO('yolov8m.pt')
+    model = YOLO('yolov8l.pt')
+    model.to(device)
     return model
 
 def train_model(model, yaml_path):
     # 학습 파라미터
     results = model.train(
         data=yaml_path,
-        epochs=30,  ##20,  # 최대 20 에폭  ##임시로 에폭을 1로 설정함.
-        imgsz=800,  # 이미지 크기
+        epochs=35, ##30,  # 최대 20 에폭  ##임시로 에폭을 1로 설정함.
+        imgsz=1080,  ##800,  # 이미지 크기
         batch=8,  # 배치 크기
         patience=10,  # Early stopping patience (10 에폭 동안 개선 없으면 중단)
         save=True,  # 모델 저장
@@ -551,7 +553,7 @@ def train_model(model, yaml_path):
         lrf=0.01,  # 최종 learning rate
         momentum=0.937,
         weight_decay=0.0005,
-        warmup_epochs=3,
+        warmup_epochs=5,  ##3,
         box=7.5,  # box loss gain
         cls=0.5,  # cls loss gain
         dfl=1.5,  # dfl loss gain
