@@ -536,7 +536,7 @@ def train_model(model, yaml_path):
     # 학습 파라미터
     results = model.train(
         data=yaml_path,
-        epochs=1,  ##20,  # 최대 20 에폭  ##임시로 에폭을 1로 설정함.
+        epochs=30,  ##20,  # 최대 20 에폭  ##임시로 에폭을 1로 설정함.
         imgsz=800,  # 이미지 크기
         batch=8,  # 배치 크기
         patience=10,  # Early stopping patience (10 에폭 동안 개선 없으면 중단)
