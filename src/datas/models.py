@@ -19,8 +19,8 @@ def train_model(model, yaml_path, base_dir):
     # 학습 파라미터
     results = model.train(
         data=yaml_path,
-        epochs=20,  # 최대 20 에폭
-        imgsz=800,  # 이미지 크기
+        epochs=40,  ##20,  # 최대 20 에폭
+        imgsz=1080,  ##800,  # 이미지 크기
         batch=8,  # 배치 크기
         patience=10,  # Early stopping patience (10 에폭 동안 개선 없으면 중단)
         save=True,  # 모델 저장

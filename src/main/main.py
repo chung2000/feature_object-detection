@@ -448,21 +448,24 @@ def process_data(images_df, categories_df, annotations_df):
         transform=val_transform
     )
 
+    batch_size  = 8
+    num_workers = 4
+
     # DataLoader
     train_loader = DataLoader(
         train_dataset,
-        batch_size=4,
+        batch_size=batch_size,  ##4,
         shuffle=True,
         collate_fn=collate_fn,
-        num_workers=2
+        num_workers=num_workers  ##2
     )
 
     val_loader = DataLoader(
         val_dataset,
-        batch_size=4,
+        batch_size=batch_size,  ##4,
         shuffle=False,
         collate_fn=collate_fn,
-        num_workers=2
+        num_workers=num_workers  ##2
     )
 
     print("✅ 데이터 증강이 적용된 Dataset/DataLoader 생성 완료!")
