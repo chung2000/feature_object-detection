@@ -4,17 +4,23 @@ from ultralytics import YOLO
 from globals import PILL_DETECTION
 
 def make_model(device):
-    #model = YOLO('yolov8m.pt')
     model = YOLO('yolov8l.pt')
     model.to(device)
+    return model
+
+def make_weight_model(device, base_dir):
+    best_model_path = f"{base_dir}/yolo_runs/pill_detection/weights/best.pt"
+    model = YOLO(best_model_path)
+    model.to(device)
+
     return model
 
 def train_model(model, yaml_path, base_dir):
     # 학습 파라미터
     results = model.train(
         data=yaml_path,
-        epochs=30,  ##35,  # 최대 20 에폭
-        imgsz=1080, ##800,  # 이미지 크기
+        epochs=20,  # 최대 20 에폭
+        imgsz=800,  # 이미지 크기
         batch=8,  # 배치 크기
         patience=10,  # Early stopping patience (10 에폭 동안 개선 없으면 중단)
         save=True,  # 모델 저장
