@@ -84,8 +84,9 @@ def main():
 
 
     # train
-    # model_large = train_large()
-    # model_medium = train_medium()
+    ### 풀면 미친듯이 학습을 시작할 것임 ###
+    model_large = train_large()
+    model_medium = train_medium()
 
     #train summary
     train_summary(categories_df, annotations_df, best_model_path="../../models/L-best.pt")

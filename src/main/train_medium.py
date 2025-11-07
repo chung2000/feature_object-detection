@@ -63,7 +63,7 @@ def train_medium():
         project="../../models/yolo_runs",
         name="yolo_ensemble_medium",
         pretrained=True,
-        device="cpu", # GPU 사용시 0으로 변경, Mac local 사용시 "mps"로 변경
+        device=0, # GPU 사용시 0으로 변경, Mac local 사용시 "mps"로 변경
         verbose=True,
         # save = True,
     )
